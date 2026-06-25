@@ -1,6 +1,17 @@
 const User = require("../models/user.model");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
+const cloudinary = require("../config/cloudinary");
+
+// Helper: upload buffer to Cloudinary
+const uploadAvatarToCloudinary = (buffer) =>
+  new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      { folder: "website_cms/avatars", transformation: [{ width: 400, height: 400, crop: "fill", gravity: "face" }] },
+      (err, result) => (err ? reject(err) : resolve(result.secure_url))
+    ).end(buffer);
+  });
+
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -259,5 +270,94 @@ exports.resetPassword = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+// @desc    Get current user profile
+// @route   GET /api/auth/profile
+// @access  Private
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.status(200).json({
+      success: true,
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update profile (name + optional avatar)
+// @route   PUT /api/auth/profile
+// @access  Private
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const updateData = {};
+
+    if (name && name.trim()) updateData.name = name.trim();
+
+    if (req.file) {
+      updateData.avatar = await uploadAvatarToCloudinary(req.file.buffer);
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updateData },
+      { new: true, runValidators: false }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Change password
+// @route   PUT /api/auth/change-password
+// @access  Private
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "Please provide current and new password" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: "New password must be at least 6 characters" });
+    }
+
+    const user = await User.findById(req.user._id).select("+password");
+    const isMatch = await user.comparePassword(currentPassword);
+
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

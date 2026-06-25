@@ -1,3 +1,6 @@
+// ⚠️ MUST be first — loads .env before any module reads process.env
+require("dotenv").config();
+
 const dns = require("dns");
 try {
   dns.setServers(["8.8.8.8", "1.1.1.1"]);
@@ -7,8 +10,6 @@ try {
 
 const mongoose = require("mongoose");
 const app = require("./app");
-
-require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 
@@ -22,3 +23,5 @@ mongoose
     });
   })
   .catch((err) => console.log(err));
+
+// Touch - settings API routes added at 16:10 ✓
