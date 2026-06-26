@@ -10,12 +10,14 @@ const {
   getProfile,
   updateProfile,
   changePassword,
+  getRegisterStatus,
 } = require("../controllers/auth.controller");
 const { protect } = require("../middlewares/auth.middleware");
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 // Public routes
+router.get("/register-status", getRegisterStatus);
 router.post("/register", register);
 router.post("/login", login);
 router.post("/forgot-password", forgotPassword);

@@ -13,10 +13,37 @@ const uploadAvatarToCloudinary = (buffer) =>
   });
 
 
+
+// @desc    Get registration status (if admin exists)
+// @route   GET /api/auth/register-status
+exports.getRegisterStatus = async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();
+    res.status(200).json({
+      success: true,
+      registrationAvailable: userCount === 0,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // @desc    Register user
 // @route   POST /api/auth/register
 exports.register = async (req, res) => {
   try {
+    // Check if any administrator account already exists (only one registration allowed)
+    const userCount = await User.countDocuments();
+    if (userCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Registration is disabled. An administrator account already exists.",
+      });
+    }
+
     const { name, email, password } = req.body;
 
     // Validate input
@@ -74,6 +101,7 @@ exports.register = async (req, res) => {
     });
   }
 };
+
 
 // @desc    Login user
 // @route   POST /api/auth/login
