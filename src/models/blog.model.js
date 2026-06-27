@@ -47,14 +47,13 @@ const blogSchema = new mongoose.Schema(
 );
 
 // Auto-generate slug from title before validation if not specified
-blogSchema.pre("validate", function (next) {
+blogSchema.pre("validate", function () {
   if (!this.slug && this.title) {
     this.slug = this.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
   }
-  next();
 });
 
 module.exports = mongoose.model("Blog", blogSchema);
