@@ -46,7 +46,8 @@ exports.getAboutSection = async (req, res) => {
           image: "",
           audioTitle: "",
           audioSource: "",
-          audioUrl: ""
+          audioUrl: "",
+          videoUrl: ""
         }
       });
     }
@@ -61,7 +62,7 @@ exports.getAboutSection = async (req, res) => {
 exports.updateAboutSection = async (req, res) => {
   try {
     const { section } = req.params;
-    const { title, subtitle, description, audioTitle, audioSource, image, audioUrl } = req.body;
+    const { title, subtitle, description, audioTitle, audioSource, image, audioUrl, videoUrl } = req.body;
 
     const updateData = {
       title: title !== undefined ? title : "",
@@ -79,6 +80,9 @@ exports.updateAboutSection = async (req, res) => {
       if (req.files.audio && req.files.audio[0]) {
         updateData.audioUrl = await uploadToCloudinary(req.files.audio[0].buffer, "auto");
       }
+      if (req.files.video && req.files.video[0]) {
+        updateData.videoUrl = await uploadToCloudinary(req.files.video[0].buffer, "video");
+      }
     }
 
     // Keep existing URL paths if no new file is uploaded and no string value overrides
@@ -89,6 +93,9 @@ exports.updateAboutSection = async (req, res) => {
       }
       if (!updateData.audioUrl) {
         updateData.audioUrl = audioUrl !== undefined ? audioUrl : existingSection.audioUrl;
+      }
+      if (!updateData.videoUrl) {
+        updateData.videoUrl = videoUrl !== undefined ? videoUrl : existingSection.videoUrl;
       }
     }
 

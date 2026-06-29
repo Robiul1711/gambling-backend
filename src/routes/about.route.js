@@ -20,6 +20,7 @@ const upload = multer({
 const aboutUpload = upload.fields([
   { name: "image", maxCount: 1 },
   { name: "audio", maxCount: 1 },
+  { name: "video", maxCount: 1 },
 ]);
 
 // Public routes

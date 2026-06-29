@@ -36,6 +36,10 @@ const aboutSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    videoUrl: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,
