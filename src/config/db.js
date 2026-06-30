@@ -8,15 +8,28 @@ try {
   console.warn("Failed to set DNS servers:", e);
 }
 
+let isConnected = false;
+
 const connectDB = async () => {
+  if (isConnected || mongoose.connection.readyState === 1) {
+    console.log("Database already connected (cached)");
+    return;
+  }
+
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    console.error("CRITICAL ERROR: MONGO_URI is not defined in environment variables!");
+    return;
+  }
+
   try {
-    console.log(process.env.MONGO_URI);
-
-    await mongoose.connect(process.env.MONGO_URI);
-
-    console.log("Database connected");
+    console.log("Attempting database connection...");
+    const db = await mongoose.connect(uri);
+    isConnected = db.connections[0].readyState === 1;
+    console.log("Database connected successfully");
   } catch (error) {
-    console.log(error);
+    console.error("Database connection failed:", error);
+    isConnected = false;
   }
 };
 
