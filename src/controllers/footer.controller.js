@@ -30,7 +30,15 @@ exports.getFooterSettings = async (req, res) => {
           instagramUrl: "#instagram",
           facebookUrl: "#facebook",
           xUrl: "#x",
-          copyrightText: "Gambling Harm UK (GHUK)."
+          copyrightText: "Gambling Harm UK (GHUK).",
+          crisisHeaderShow: true,
+          crisisHeaderText: "In Crisis Or Thinking About Suicide? Call",
+          crisisHeaderPhone: "Samaritans 116 123",
+          crisisHeaderPhoneLink: "116123",
+          crisisHeaderBtnText: "Urgent Help →",
+          crisisHeaderBtnLink: "/urgent-help",
+          crisisHeaderBgColor: "#C92525",
+          crisisHeaderTextColor: "#ffffff",
         }
       });
     }
@@ -44,7 +52,22 @@ exports.getFooterSettings = async (req, res) => {
 // ─── UPDATE FOOTER SETTINGS ──────────────────────────────────────────────────
 exports.updateFooterSettings = async (req, res) => {
   try {
-    const { description, instagramUrl, facebookUrl, xUrl, copyrightText, logo } = req.body;
+    const {
+      description,
+      instagramUrl,
+      facebookUrl,
+      xUrl,
+      copyrightText,
+      logo,
+      crisisHeaderShow,
+      crisisHeaderText,
+      crisisHeaderPhone,
+      crisisHeaderPhoneLink,
+      crisisHeaderBtnText,
+      crisisHeaderBtnLink,
+      crisisHeaderBgColor,
+      crisisHeaderTextColor,
+    } = req.body;
 
     const updateData = {
       description: description !== undefined ? description : "",
@@ -52,6 +75,14 @@ exports.updateFooterSettings = async (req, res) => {
       facebookUrl: facebookUrl !== undefined ? facebookUrl : "",
       xUrl: xUrl !== undefined ? xUrl : "",
       copyrightText: copyrightText !== undefined ? copyrightText : "",
+      crisisHeaderShow: crisisHeaderShow !== undefined ? (crisisHeaderShow === "true" || crisisHeaderShow === true) : true,
+      crisisHeaderText: crisisHeaderText !== undefined ? crisisHeaderText : "",
+      crisisHeaderPhone: crisisHeaderPhone !== undefined ? crisisHeaderPhone : "",
+      crisisHeaderPhoneLink: crisisHeaderPhoneLink !== undefined ? crisisHeaderPhoneLink : "",
+      crisisHeaderBtnText: crisisHeaderBtnText !== undefined ? crisisHeaderBtnText : "",
+      crisisHeaderBtnLink: crisisHeaderBtnLink !== undefined ? crisisHeaderBtnLink : "",
+      crisisHeaderBgColor: crisisHeaderBgColor !== undefined ? crisisHeaderBgColor : "#C92525",
+      crisisHeaderTextColor: crisisHeaderTextColor !== undefined ? crisisHeaderTextColor : "#ffffff",
     };
 
     // Upload new logo image if provided
