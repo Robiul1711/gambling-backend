@@ -81,7 +81,7 @@ exports.updateAboutSection = async (req, res) => {
         updateData.audioUrl = await uploadToCloudinary(req.files.audio[0].buffer, "auto");
       }
       if (req.files.video && req.files.video[0]) {
-        updateData.videoUrl = await uploadToCloudinary(req.files.video[0].buffer, "video");
+        updateData.videoUrl = await uploadToCloudinary(req.files.video[0].buffer, "auto");
       }
     }
 
