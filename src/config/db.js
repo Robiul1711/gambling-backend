@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 const dns = require("dns");
 
-// Set default DNS servers to bypass local/ISP DNS issues with SRV queries
-try {
-  dns.setServers(["8.8.8.8", "1.1.1.1"]);
-} catch (e) {
-  console.warn("Failed to set DNS servers:", e);
+// Set default DNS servers to bypass local/ISP DNS issues with SRV queries in development
+if (process.env.NODE_ENV !== "production") {
+  try {
+    dns.setServers(["8.8.8.8", "1.1.1.1"]);
+  } catch (e) {
+    console.warn("Failed to set DNS servers:", e);
+  }
 }
 
 let isConnected = false;
