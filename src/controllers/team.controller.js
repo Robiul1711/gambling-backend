@@ -18,7 +18,11 @@ const uploadToCloudinary = (fileBuffer) => {
 // ─── GET ALL TEAM MEMBERS ───────────────────────────────────────────────────
 exports.getTeamMembers = async (req, res) => {
   try {
-    const members = await Team.find().sort({ displayOrder: 1, createdAt: -1 });
+    const filter = {};
+    if (req.query.type) {
+      filter.type = req.query.type;
+    }
+    const members = await Team.find(filter).sort({ displayOrder: 1, createdAt: -1 });
     res.status(200).json({ success: true, data: members });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -28,7 +32,7 @@ exports.getTeamMembers = async (req, res) => {
 // ─── CREATE TEAM MEMBER ──────────────────────────────────────────────────────
 exports.createTeamMember = async (req, res) => {
   try {
-    const { name, role, bio, initials, declaredInterests, email, displayOrder } = req.body;
+    const { name, role, bio, initials, declaredInterests, email, displayOrder, type } = req.body;
 
     if (!name || !role || !bio) {
       return res.status(400).json({
@@ -45,6 +49,7 @@ exports.createTeamMember = async (req, res) => {
       declaredInterests,
       email,
       displayOrder: displayOrder ? parseInt(displayOrder) : 0,
+      type: type || "operational",
     };
 
     if (req.file) {
@@ -67,7 +72,7 @@ exports.createTeamMember = async (req, res) => {
 exports.updateTeamMember = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, role, bio, initials, declaredInterests, email, displayOrder } = req.body;
+    const { name, role, bio, initials, declaredInterests, email, displayOrder, type } = req.body;
 
     let member = await Team.findById(id);
     if (!member) {
@@ -82,6 +87,7 @@ exports.updateTeamMember = async (req, res) => {
       declaredInterests: declaredInterests !== undefined ? declaredInterests : member.declaredInterests,
       email: email !== undefined ? email : member.email,
       displayOrder: displayOrder !== undefined ? parseInt(displayOrder) : member.displayOrder,
+      type: type !== undefined ? type : member.type,
     };
 
     if (req.file) {
