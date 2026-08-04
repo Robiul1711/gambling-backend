@@ -47,7 +47,9 @@ exports.getAboutSection = async (req, res) => {
           audioTitle: "",
           audioSource: "",
           audioUrl: "",
-          videoUrl: ""
+          videoUrl: "",
+          videoUrl1: "",
+          videoUrl2: ""
         }
       });
     }
@@ -62,7 +64,7 @@ exports.getAboutSection = async (req, res) => {
 exports.updateAboutSection = async (req, res) => {
   try {
     const { section } = req.params;
-    const { title, subtitle, description, audioTitle, audioSource, image, audioUrl, videoUrl } = req.body;
+    const { title, subtitle, description, audioTitle, audioSource, image, audioUrl, videoUrl, videoUrl1, videoUrl2 } = req.body;
 
     const updateData = {
       title: title !== undefined ? title : "",
@@ -70,6 +72,9 @@ exports.updateAboutSection = async (req, res) => {
       description: description !== undefined ? description : "",
       audioTitle: audioTitle !== undefined ? audioTitle : "",
       audioSource: audioSource !== undefined ? audioSource : "",
+      videoUrl: videoUrl !== undefined ? videoUrl : "",
+      videoUrl1: videoUrl1 !== undefined ? videoUrl1 : "",
+      videoUrl2: videoUrl2 !== undefined ? videoUrl2 : "",
     };
 
     // Upload files if provided
@@ -96,6 +101,12 @@ exports.updateAboutSection = async (req, res) => {
       }
       if (!updateData.videoUrl) {
         updateData.videoUrl = videoUrl !== undefined ? videoUrl : existingSection.videoUrl;
+      }
+      if (!updateData.videoUrl1) {
+        updateData.videoUrl1 = videoUrl1 !== undefined ? videoUrl1 : existingSection.videoUrl1;
+      }
+      if (!updateData.videoUrl2) {
+        updateData.videoUrl2 = videoUrl2 !== undefined ? videoUrl2 : existingSection.videoUrl2;
       }
     }
 

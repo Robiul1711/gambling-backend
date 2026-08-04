@@ -40,6 +40,14 @@ const aboutSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    videoUrl1: {
+      type: String,
+      default: "",
+    },
+    videoUrl2: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,
