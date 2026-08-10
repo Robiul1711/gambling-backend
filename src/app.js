@@ -12,6 +12,7 @@ const teamRoutes = require("./routes/team.route");
 const aboutRoutes = require("./routes/about.route");
 const footerRoutes = require("./routes/footer.route");
 const newsResearchRoutes = require("./routes/newsResearch.route");
+const registrationRoutes = require("./routes/registration.route");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/team", teamRoutes);
 app.use("/api/about", aboutRoutes);
 app.use("/api/footer", footerRoutes);
 app.use("/api/news-research", newsResearchRoutes);
+app.use("/api/registrations", registrationRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
