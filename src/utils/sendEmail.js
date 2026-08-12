@@ -11,7 +11,7 @@ const sendEmail = async (options) => {
   });
 
   const mailOptions = {
-    from: `"Admin Panel" <${process.env.EMAIL_FROM}>`,
+    from: `"Gambling Harm UK" <${process.env.EMAIL_FROM}>`,
     to: options.email,
     subject: options.subject,
     html: options.html,
