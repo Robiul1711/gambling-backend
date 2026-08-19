@@ -16,11 +16,19 @@ const registrationRoutes = require("./routes/registration.route");
 
 const app = express();
 
-// Connect to Database
-connectDB();
-
 app.use(cors());
 app.use(express.json());
+
+// Ensure Database is connected for Serverless / Vercel cold starts
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("Database connection error in middleware:", err);
+    res.status(500).json({ success: false, message: "Database connection error" });
+  }
+});
 
 // Serve static uploads
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));

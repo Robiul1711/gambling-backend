@@ -10,29 +10,49 @@ if (process.env.NODE_ENV !== "production") {
   }
 }
 
-let isConnected = false;
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
 const connectDB = async () => {
-  if (isConnected || mongoose.connection.readyState === 1) {
-    console.log("Database already connected (cached)");
-    return;
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    return cached.conn;
   }
 
   const uri = process.env.MONGO_URI;
   if (!uri) {
     console.error("CRITICAL ERROR: MONGO_URI is not defined in environment variables!");
-    return;
+    throw new Error("MONGO_URI is not defined");
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      serverSelectionTimeoutMS: 5000,
+    };
+
+    cached.promise = mongoose
+      .connect(uri, opts)
+      .then((mongooseInstance) => {
+        console.log("Database connected successfully");
+        return mongooseInstance;
+      })
+      .catch((err) => {
+        cached.promise = null;
+        console.error("Database connection failed:", err);
+        throw err;
+      });
   }
 
   try {
-    console.log("Attempting database connection...");
-    const db = await mongoose.connect(uri);
-    isConnected = db.connections[0].readyState === 1;
-    console.log("Database connected successfully");
-  } catch (error) {
-    console.error("Database connection failed:", error);
-    isConnected = false;
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
   }
+
+  return cached.conn;
 };
 
 module.exports = connectDB;
