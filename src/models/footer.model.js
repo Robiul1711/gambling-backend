@@ -22,6 +22,10 @@ const footerSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    linkedinUrl: {
+      type: String,
+      default: "",
+    },
     copyrightText: {
       type: String,
       default: "",
