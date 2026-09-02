@@ -231,10 +231,11 @@ exports.forgotPassword = async (req, res) => {
     const resetToken = member.getResetPasswordToken();
     await member.save({ validateBeforeSave: false });
 
-    const clientUrl =
+    const rawClientUrl =
       process.env.FRONTEND_URL ||
       process.env.MEMBER_CLIENT_URL ||
-      "http://localhost:5173";
+      "https://gambling-harm-uk.netlify.app";
+    const clientUrl = rawClientUrl.replace(/\/+$/, "");
     const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
 
     const htmlMessage = `

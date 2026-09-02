@@ -119,10 +119,11 @@ exports.updateMemberStatus = async (req, res) => {
     await member.save();
 
     // Send email notification based on status
-    const clientUrl =
+    const rawClientUrl =
       process.env.FRONTEND_URL ||
       process.env.MEMBER_CLIENT_URL ||
-      "http://localhost:5173";
+      "https://gambling-harm-uk.netlify.app";
+    const clientUrl = rawClientUrl.replace(/\/+$/, "");
 
     if (status === "approved") {
       const signInUrl = `${clientUrl}/sign-in`;
