@@ -14,7 +14,9 @@ exports.registerMember = async (req, res) => {
       organisation,
       role,
       sector,
+      sectors,
       membershipNeeds,
+      anythingElse,
       agreeTerms,
       newsletterUpdates,
     } = req.body;
@@ -42,6 +44,22 @@ exports.registerMember = async (req, res) => {
       });
     }
 
+    // Format sectors
+    const sectorsArray = Array.isArray(sectors)
+      ? sectors
+      : Array.isArray(sector)
+      ? sector
+      : sector && sector !== "Please choose one"
+      ? [sector]
+      : [];
+
+    const sectorString =
+      typeof sector === "string" && sector !== "Please choose one"
+        ? sector
+        : sectorsArray.length > 0
+        ? sectorsArray.join(", ")
+        : "Other";
+
     // Create member in pending status
     const member = await Member.create({
       name,
@@ -49,8 +67,10 @@ exports.registerMember = async (req, res) => {
       password,
       organisation: organisation || "",
       role: role || "",
-      sector: sector || "Other",
+      sector: sectorString,
+      sectors: sectorsArray,
       membershipNeeds: membershipNeeds || "",
+      anythingElse: anythingElse || "",
       agreeTerms: !!agreeTerms,
       newsletterUpdates: !!newsletterUpdates,
       status: "pending",

@@ -39,7 +39,16 @@ const memberSchema = new mongoose.Schema(
       default: "Other",
       trim: true,
     },
+    sectors: {
+      type: [String],
+      default: [],
+    },
     membershipNeeds: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    anythingElse: {
       type: String,
       default: "",
       trim: true,
