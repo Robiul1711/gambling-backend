@@ -47,6 +47,10 @@ const footerSchema = new mongoose.Schema(
       type: String,
       default: "116123",
     },
+    crisisHeaderSubText: {
+      type: String,
+      default: "Free, 24/7.",
+    },
     crisisHeaderBtnText: {
       type: String,
       default: "Urgent Help →",
