@@ -13,6 +13,7 @@ const aboutRoutes = require("./routes/about.route");
 const footerRoutes = require("./routes/footer.route");
 const newsResearchRoutes = require("./routes/newsResearch.route");
 const registrationRoutes = require("./routes/registration.route");
+const bookingRoutes = require("./routes/booking.route");
 const memberAuthRoutes = require("./routes/memberAuth.route");
 const memberAdminRoutes = require("./routes/memberAdmin.route");
 
@@ -44,6 +45,7 @@ app.use("/api/about", aboutRoutes);
 app.use("/api/footer", footerRoutes);
 app.use("/api/news-research", newsResearchRoutes);
 app.use("/api/registrations", registrationRoutes);
+app.use("/api/bookings", bookingRoutes);
 app.use("/api/member-auth", memberAuthRoutes);
 app.use("/api/members", memberAdminRoutes);
 
