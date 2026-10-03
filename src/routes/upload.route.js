@@ -8,13 +8,16 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
 });
 
-// Upload endpoint utilizing Cloudinary Stream upload
-router.post("/", upload.single("image"), async (req, res) => {
+// Upload endpoint supporting both "image", "file" or any field name
+router.post("/", upload.any(), async (req, res) => {
   try {
-    if (!req.file) {
+    const uploadedFile =
+      req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
+
+    if (!uploadedFile) {
       return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
@@ -24,13 +27,15 @@ router.post("/", upload.single("image"), async (req, res) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: "website_cms",
+            resource_type: "auto", // supports images, PDFs, raw documents, videos, etc.
+            public_id: `${Date.now()}_${uploadedFile.originalname.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_")}`,
           },
           (error, result) => {
             if (error) return reject(error);
             resolve(result);
           }
         );
-        stream.end(req.file.buffer);
+        stream.end(uploadedFile.buffer);
       });
     };
 
@@ -38,13 +43,19 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "File uploaded to Cloudinary successfully",
-      url: result.secure_url,
+      message: "File uploaded successfully",
+      url: result.secure_url || result.url,
+      data: {
+        url: result.secure_url || result.url,
+        format: result.format,
+        bytes: result.bytes,
+      },
     });
   } catch (error) {
+    console.error("Cloudinary upload error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Failed to upload file to storage",
     });
   }
 });

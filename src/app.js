@@ -16,6 +16,8 @@ const registrationRoutes = require("./routes/registration.route");
 const bookingRoutes = require("./routes/booking.route");
 const memberAuthRoutes = require("./routes/memberAuth.route");
 const memberAdminRoutes = require("./routes/memberAdmin.route");
+const eventRoutes = require("./routes/event.route");
+const libraryResourceRoutes = require("./routes/libraryResource.route");
 
 const app = express();
 
@@ -48,6 +50,8 @@ app.use("/api/registrations", registrationRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/member-auth", memberAuthRoutes);
 app.use("/api/members", memberAdminRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/library-resources", libraryResourceRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
