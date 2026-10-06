@@ -82,6 +82,21 @@ const eventSchema = new mongoose.Schema(
       trim: true,
       default: "[Explain how to register or attend. If there is a booking link, use the button below.]",
     },
+    eventbriteId: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    eventbriteUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    imageUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     status: {
       type: String,
       enum: ["upcoming", "completed", "draft"],

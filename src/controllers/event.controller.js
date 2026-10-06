@@ -2,16 +2,153 @@ const Event = require("../models/event.model");
 const EventRegistration = require("../models/eventRegistration.model");
 const sendEmail = require("../utils/sendEmail");
 
-// GET all public events (upcoming or filtered by status)
+// Helper: Sync events from Eventbrite API
+const syncEventbriteHelper = async () => {
+  const token = process.env.EVENTBRITE_API_TOKEN || "FFDOESO7EY52KFRPKZR3";
+  const orgId = process.env.EVENTBRITE_ORGANIZER_ID || "119515747671";
+
+  if (!token || !orgId) {
+    return { success: false, message: "Eventbrite credentials not configured" };
+  }
+
+  try {
+    const url = `https://www.eventbriteapi.com/v3/organizers/${orgId}/events/?status=live,started,ended,all&order_by=start_desc`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Eventbrite API responded with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    const eventbriteEvents = data.events || [];
+
+    const syncedList = [];
+
+    for (const ev of eventbriteEvents) {
+      const startDate = new Date(ev.start?.local || ev.start?.utc);
+      const endDate = new Date(ev.end?.local || ev.end?.utc);
+
+      const dayStr = isNaN(startDate.getTime())
+        ? "DD"
+        : startDate.toLocaleDateString("en-GB", { day: "2-digit" });
+
+      const monthStr = isNaN(startDate.getTime())
+        ? "MON"
+        : startDate.toLocaleDateString("en-GB", { month: "short" }).toUpperCase();
+
+      const fullDateStr = isNaN(startDate.getTime())
+        ? "Date TBC"
+        : startDate.toLocaleDateString("en-GB", {
+            weekday: "short",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
+
+      const timeStr =
+        !isNaN(startDate.getTime()) && !isNaN(endDate.getTime())
+          ? `${startDate.toLocaleTimeString("en-GB", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })} to ${endDate.toLocaleTimeString("en-GB", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}`
+          : "Time TBC";
+
+      const eventPayload = {
+        title: ev.name?.text || "Untitled Event",
+        category: ev.online_event ? "WEBINAR" : "WORKSHOP",
+        day: dayStr,
+        month: monthStr,
+        date: fullDateStr,
+        time: timeStr,
+        format: ev.online_event ? "Online" : "In person",
+        location: ev.online_event
+          ? "Online (Joining link sent on registration)"
+          : "In person",
+        cost: ev.is_free ? "Free" : "Ticketed",
+        whoItIsFor:
+          "NHS, local authorities, educators, healthcare teams and anyone affected",
+        oneLineDescription:
+          ev.summary || ev.description?.text?.slice(0, 160) || "",
+        summary: ev.summary || ev.description?.text?.slice(0, 250) || "",
+        aboutParagraphs: ev.description?.text
+          ? ev.description.text.split("\n\n").filter(Boolean)
+          : [ev.summary || "No description provided."],
+        howToJoin:
+          "Register for free directly on Eventbrite using the booking link below.",
+        eventbriteId: ev.id,
+        eventbriteUrl: ev.url,
+        imageUrl: ev.logo?.original?.url || ev.logo?.url || "",
+        status:
+          ev.status === "live"
+            ? "upcoming"
+            : ev.status === "ended"
+            ? "completed"
+            : "draft",
+      };
+
+      const syncedEvent = await Event.findOneAndUpdate(
+        { eventbriteId: ev.id },
+        { $set: eventPayload },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+
+      syncedList.push(syncedEvent);
+    }
+
+    return { success: true, count: syncedList.length, data: syncedList };
+  } catch (error) {
+    console.error("Eventbrite auto-sync error:", error.message);
+    return { success: false, message: error.message };
+  }
+};
+
+// GET all public events (with automatic background sync if empty or requested)
 exports.getEvents = async (req, res) => {
   try {
-    const { status = "upcoming", all } = req.query;
+    const { status = "upcoming", all, sync } = req.query;
+
+    if (sync === "true") {
+      await syncEventbriteHelper();
+    }
+
     const query = {};
     if (all !== "true" && status) {
       query.status = status;
     }
-    const events = await Event.find(query).sort({ order: 1, createdAt: -1 });
+
+    let events = await Event.find(query).sort({ order: 1, createdAt: -1 });
+
+    // If no events in DB yet, attempt a sync from Eventbrite
+    if (events.length === 0) {
+      await syncEventbriteHelper();
+      events = await Event.find(query).sort({ order: 1, createdAt: -1 });
+    }
+
     res.status(200).json({ success: true, count: events.length, data: events });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Explicit Sync endpoint
+exports.syncEventbrite = async (req, res) => {
+  try {
+    const result = await syncEventbriteHelper();
+    if (!result.success) {
+      return res.status(500).json(result);
+    }
+    res.status(200).json({
+      success: true,
+      message: `Successfully synced ${result.count} events from Eventbrite!`,
+      data: result.data,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

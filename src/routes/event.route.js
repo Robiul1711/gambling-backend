@@ -5,6 +5,8 @@ const { protect } = require("../middlewares/auth.middleware");
 
 // Public endpoints
 router.get("/", eventController.getEvents);
+router.get("/sync-eventbrite", eventController.syncEventbrite);
+router.post("/sync-eventbrite", eventController.syncEventbrite);
 router.get("/:id", eventController.getEventById);
 router.post("/register", eventController.registerForEvent);
 router.post("/:id/register", eventController.registerForEvent);
