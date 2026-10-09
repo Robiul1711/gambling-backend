@@ -18,6 +18,7 @@ const memberAuthRoutes = require("./routes/memberAuth.route");
 const memberAdminRoutes = require("./routes/memberAdmin.route");
 const eventRoutes = require("./routes/event.route");
 const libraryResourceRoutes = require("./routes/libraryResource.route");
+const checkInAnalyticsRoutes = require("./routes/checkInAnalytics.route");
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use("/api/member-auth", memberAuthRoutes);
 app.use("/api/members", memberAdminRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/library-resources", libraryResourceRoutes);
+app.use("/api/check-in-analytics", checkInAnalyticsRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
