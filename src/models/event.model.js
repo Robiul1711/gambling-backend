@@ -97,6 +97,16 @@ const eventSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    recordingUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    slidesUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     status: {
       type: String,
       enum: ["upcoming", "completed", "draft"],
